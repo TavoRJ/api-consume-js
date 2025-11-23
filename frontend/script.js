@@ -7,6 +7,20 @@ const inputPrecio = document.getElementById('precio');
 const mensajeVacio = document.getElementById('mensajeVacio');
 const statusEl = document.getElementById('status');
 const btnAgregar = document.getElementById('btnAgregar');
+// referencias modal
+const modalEditarEl = document.getElementById('modalEditar');
+const formEditar = document.getElementById('formEditar');
+const editarIdEl = document.getElementById('editarId');
+const editarNombreEl = document.getElementById('editarNombre');
+const editarPrecioEl = document.getElementById('editarPrecio');
+const editarErrorEl = document.getElementById('editarError');
+
+// crear instancia de Bootstrap modal (para control por JS)
+let bootstrapModal;
+if (typeof bootstrap !== 'undefined') {
+  bootstrapModal = new bootstrap.Modal(document.getElementById('modalEditar'));
+}
+
 
 async function cargarProductos() {
   try {
@@ -127,43 +141,76 @@ document.addEventListener('click', async (e) => {
 });
 
 // editar producto (opcional)
-// delegación de eventos para btn-editar (PUT)
-document.addEventListener('click', async (e) => {
+// Delegación de eventos: abrir modal al hacer click en Editar
+document.addEventListener('click', (e) => {
+  // abrir modal
   if (e.target.matches('.btn-editar')) {
     const id = e.target.getAttribute('data-id');
-    const nombreActual = e.target.getAttribute('data-nombre');
-    const precioActual = e.target.getAttribute('data-precio');
+    const nombre = e.target.getAttribute('data-nombre');
+    const precio = e.target.getAttribute('data-precio');
 
-    // prompts rápidos
-    const nuevoNombre = prompt("Nuevo nombre:", nombreActual);
-    if (!nuevoNombre) return;
+    // llenar formulario del modal
+    editarIdEl.value = id;
+    editarNombreEl.value = nombre;
+    editarPrecioEl.value = precio;
 
-    const nuevoPrecio = prompt("Nuevo precio:", precioActual);
-    if (!nuevoPrecio || isNaN(nuevoPrecio)) {
-      alert("Precio inválido.");
-      return;
+    // limpiar errores
+    editarErrorEl.classList.add('d-none');
+    editarErrorEl.textContent = '';
+
+    // mostrar modal usando Bootstrap JS (si está disponible)
+    if (bootstrapModal) {
+      bootstrapModal.show();
+    } else {
+      // fallback: focus al input si modal no disponible
+      editarNombreEl.focus();
+    }
+  }
+});
+
+// manejar submit del modal (PUT)
+formEditar.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+
+  const id = editarIdEl.value;
+  const nombre = editarNombreEl.value.trim();
+  const precio = parseFloat(editarPrecioEl.value);
+
+  // validación sencilla
+  if (!nombre || isNaN(precio) || precio < 0) {
+    editarErrorEl.classList.remove('d-none');
+    editarErrorEl.textContent = 'Nombre y precio válidos son requeridos.';
+    return;
+  }
+
+  // feedback UI
+  const btnGuardar = document.getElementById('btnGuardarCambios');
+  btnGuardar.disabled = true;
+  btnGuardar.textContent = 'Guardando...';
+
+  try {
+    const res = await fetch(`${API}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, precio: parseFloat(precio) })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({error:'Error'}));
+      throw new Error(err.error || 'Error al actualizar');
     }
 
-    try {
-      const res = await fetch(`${API}/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombre: nuevoNombre,
-          precio: parseFloat(nuevoPrecio)
-        })
-      });
+    // cerrar modal y recargar productos
+    if (bootstrapModal) bootstrapModal.hide();
+    await cargarProductos();
 
-      if (!res.ok) {
-        const err = await res.json().catch(()=>({error:"Error desconocido"}));
-        throw new Error(err.error || res.status);
-      }
-
-      await cargarProductos(); // refresca UI
-    } catch (err) {
-      console.error("Editar error", err);
-      alert("No se pudo editar el producto.");
-    }
+  } catch (err) {
+    console.error('Error al guardar cambios:', err);
+    editarErrorEl.classList.remove('d-none');
+    editarErrorEl.textContent = 'No se pudo guardar. Revisa la consola.';
+  } finally {
+    btnGuardar.disabled = false;
+    btnGuardar.textContent = 'Guardar cambios';
   }
 });
 
