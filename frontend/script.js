@@ -72,7 +72,7 @@ function renderizar(productos) {
   }).join('');
 }
 
-// simple escape to avoid HTML injection
+// simple escape to avoid HTML injection (verificar luego)
 function escapeHtml(str) {
   if (!str) return '';
   return String(str)
@@ -158,7 +158,7 @@ document.addEventListener('click', (e) => {
     editarErrorEl.classList.add('d-none');
     editarErrorEl.textContent = '';
 
-    // mostrar modal usando Bootstrap JS (si está disponible)
+    // mostrar modal usando Bootstrap JS (solo si esta disponible)
     if (bootstrapModal) {
       bootstrapModal.show();
     } else {

@@ -46,7 +46,7 @@ app.post('/api/productos', async (req, res) => {
   }
 });
 
-// otro endpoint para eleiminar
+// otro endpoint para eliminar
 // eliminar producto por id
 app.delete('/api/productos/:id', async (req, res) => {
   const id = parseInt(req.params.id);

@@ -1,20 +1,19 @@
-/* frontend/styles.css
-   Estilos profesionales para el proyecto "API - Productos"
+/* - Incluire esto a mi css (a futuro) - edit 23112025
    - Variables CSS
    - Layout responsivo
    - Tarjetas, botones, formulario
    - Microinteracciones
 */
 
-/* -------- tokens / variables -------- */
+/* -------- tokens y variables -------- */
 :root{
   --bg: #f6f7fb;
   --surface: #ffffff;
   --muted: #6c757d;
   --text: #1f2937;
-  --primary: #0d6efd;       /* bootstrap blue */
+  --primary: #0d6efd;       
   --primary-600: #0842ff;
-  --accent: #7c3aed;        /* violeta suave */
+  --accent: #7c3aed;        
   --success: #198754;
   --danger: #dc3545;
 
@@ -27,7 +26,7 @@
   --transition-med: 300ms;
 }
 
-/* -------- base / reset -------- */
+/* -------- base  reset -------- */
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
@@ -39,7 +38,7 @@ body{
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
   line-height:1.5;
-  padding-bottom:48px; /* espacio al footer */
+  padding-bottom:48px; 
 }
 
 /* -------- layout -------- */
