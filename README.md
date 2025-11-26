@@ -18,16 +18,15 @@ Desarrollado en **VS Code** por **Gustavo**.
 
 ---
 
-## 🔥 Novedades en esta versión
+## Novedades en esta versión
 - Nuevo **navbar lateral (left sidebar)** con navegación y tema profesional.  
-- Diseño visual renovado usando **SCSS** (fuente) + CSS compilado (styles.css).  
+- Diseño visual renovado usando **CSS** (fuente) + CSS compilado (styles.css).  
 - Modal personalizado para **editar/crear productos** (mejora UX frente a `prompt()`).  
 - Tabla de productos con formato de moneda ($xx.xx) — precios con **2 decimales**.  
-- Mejor organización de frontend/backend y script de compilado SCSS opcional.
 
 ---
 
-## 🚀 Características principales
+## Características principales
 - CRUD completo de `Productos`:
   - `GET /api/productos` — listar
   - `POST /api/productos` — crear `{ nombre, precio }`
@@ -36,11 +35,10 @@ Desarrollado en **VS Code** por **Gustavo**.
 - Frontend interactivo con:
   - Sidebar (left nav), tabla, modal de edición
   - Validación simple y feedback de UI
-- SCSS para estilos mantenibles y variables
 
 ---
 
-## 🧰 Tech stack
+## Tech stack
 - Backend: Node.js, Express, `mssql` (SQL Server)  
 - Frontend: HTML5, CSS, JavaScript (ES6)  
 - Herramientas: Git, GitHub, VS Code  
@@ -48,27 +46,10 @@ Desarrollado en **VS Code** por **Gustavo**.
 
 ---
 
-## 📁 Estructura del repo (resumen)
-api-consume-js/
-├─ backend/
-│ ├─ server.js
-│ ├─ db.js
-│ ├─ package.json
-│ └─ .env.example (recordatorio)
-├─ frontend/
-│ ├─ index.html
-│ ├─ script.js
-│ ├─ styles.css # CSS compilado (para navegador)
-│ └─ 
-├─ database/
-│ └─ schema.sql
-├─ .gitignore
-└─ README.md
-
-
+## 📁 Estructura del repo (resumen - para futuro)
 --- 
 
-## 🔧 Instalación y ejecución local (rápido)
+## Instalación y ejecución local (rápido)
 1. Clonar:
 ```bash
 git clone https://github.com/TavoRJ/api-consume-js.git
@@ -76,18 +57,19 @@ cd api-consume-js
 ```
 ---
 ## Instalar dependencias y correr backend
+``` bash
 cd backend
 npm install
 # ejecutar servidor
 node server.js
 # o con nodemon
 npm run dev
-
+```
 Abre en el navegador: http://localhost:3000/index.html
 
 ---
 
-## 📬 Contacto
+## Contacto
 
 Tavo RJ — rojas.gustavorj@gmail.com
 
