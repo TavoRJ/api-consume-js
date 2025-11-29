@@ -1,69 +1,95 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API - DEMO</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Productos - Panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<div class="app-shell">
-  <aside class="sidebar">
-  <!-- NAV LATERAL -->
-  <nav class="sidebar">
-    <h2 class="sidebar__title">API - PRODUCTOS</h2>
-    <ul class="sidebar__menu">
-      <li class="sidebar__item active"><span>📦</span> Productos</li>
-      <li class="sidebar__item"><span>📊</span> Reportes</li>
-      <li class="sidebar__item"><span>⚙️</span> Configuración</li>
-      <li class="sidebar__item"><span>❓</span> Ayuda</li>
-    </ul>
-  </nav>
-</aside>
-  <!-- CONTENIDO PRINCIPAL -->
-  <main class="main">
-    <header class="header">
-      <h1>Gestión de Productos</h1>
-      <button id="btnAdd" class="btn-primary">+ Agregar Producto</button>
+
+<div class="app-shell d-flex">
+
+  <!-- mi apartado para SIDEBAR -->
+  <aside id="sidebar" class="sidebar" aria-label="Menú lateral">
+    <div class="sidebar-brand d-flex align-items-center mb-3">
+      <img src="assets/logo.png" alt="logo" class="sidebar-logo me-2" onerror="this.style.display='none'">
+      <div>
+        <div class="h6 mb-0">Tavo RJ</div>
+        <small class="text-muted">Proyectos</small>
+      </div>
+      <button id="btnCollapse" class="btn btn-sm btn-light ms-auto d-lg-none" aria-label="Cerrar menú">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <nav class="nav flex-column" role="navigation" aria-label="Menú principal">
+      <a href="#" class="nav-link side-item active" data-section="dashboard"><i class="bi bi-speedometer2 me-3"></i><span>Dashboard</span></a>
+      <a href="#" class="nav-link side-item" data-section="productos"><i class="bi bi-box-seam me-3"></i><span>Productos</span></a>
+      <a href="#" class="nav-link side-item" data-section="pedidos"><i class="bi bi-card-list me-3"></i><span>Pedidos</span></a>
+      <a href="#" class="nav-link side-item" data-section="config"><i class="bi bi-gear me-3"></i><span>Ajustes</span></a>
+
+      <div class="mt-auto px-2 pb-3">
+        <button id="btnToggleTheme" class="btn btn-sm btn-outline-light w-100"><i class="bi bi-moon-fill me-2"></i>Tema</button>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-grow-1 main">
+    <header class="header mb-3">
+      <h1 class="m-0">Gestión de Productos</h1>
+      <div class="d-flex gap-2 align-items-center">
+        <input id="buscarProducto" class="form-control form-control-sm me-2" placeholder="Buscar..." style="min-width:160px;">
+        <button id="btnAdd" class="btn btn-primary">+ Agregar Producto</button>
+      </div>
     </header>
 
-    <section class="table-section">
+    <section class="table-section mb-4">
       <table class="product-table">
         <thead>
           <tr>
-            <th>ID</th>
+            <th style="width:6%">ID</th>
             <th>Nombre</th>
-            <th>Precio</th>
-            <th>Acciones</th>
+            <th style="width:12%">Precio</th>
+            <th style="width:18%">Acciones</th>
           </tr>
         </thead>
         <tbody id="productTable"></tbody>
       </table>
     </section>
+
+    <footer class="text-muted small">Hecho por Tavo — Proyecto de práctica</footer>
   </main>
+</div>
 
-  <!-- MODAL -->
-  <div id="modal" class="modal hidden">
-    <div class="modal__content">
-      <h2 id="modalTitle">Nuevo Producto</h2>
-      <form id="productForm">
-        <label>Nombre:</label>
-        <input type="text" id="name" required>
+<!-- MODAL (crear/editar) -->
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal__content">
+    <h2 id="modalTitle">Nuevo producto</h2>
+    <form id="productForm">
+      <label for="name">Nombre</label>
+      <input id="name" type="text" required>
 
-        <label>Precio:</label>
-        <input type="number" id="price"  step="0.01" min="0" required>
+      <label for="price">Precio (ej. 2.99)</label>
+      <input id="price" type="number" step="0.01" min="0" required>
 
-        <button type="submit" class="btn-primary">Guardar</button>
-        <button type="button" id="btnClose" class="btn-secondary">Cancelar</button>
-      </form>
-    </div>
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" id="btnClose" class="btn btn-secondary">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
   </div>
+</div>
 
-  <script src="script.js"></script>
-  </div>
+<!-- Overlay para telefonos -->
+<div class="overlay-shade d-none" id="overlay"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
-
