@@ -1,4 +1,4 @@
-# API-CONSTATE-JS  
+# API-CONSUME-JS  
 Proyecto base full-stack (Node.js + SQL Server + Frontend simple)
 
 Este proyecto fue creado **intencionalmente simple**, sirviendo como **plantilla base** para futuros proyectos más grandes y reales.  
