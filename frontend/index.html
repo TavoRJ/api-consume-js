@@ -3,7 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta http-equiv="cache-control" content="no-store" />
+  <meta http-equiv="pragma" content="no-cache" />
+  <meta http-equiv="expires" content="0" />
   <title>Productos - Panel</title>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
@@ -13,13 +17,13 @@
 
 <div class="app-shell d-flex">
 
-  <!-- mi apartado para SIDEBAR -->
+  <!-- SIDEBAR LATERAL -->
   <aside id="sidebar" class="sidebar" aria-label="Menú lateral">
     <div class="sidebar-brand d-flex align-items-center mb-3">
       <img src="assets/logo.png" alt="logo" class="sidebar-logo me-2" onerror="this.style.display='none'">
       <div>
-        <div class="h6 mb-0">Tavo RJ</div>
-        <small class="text-muted">Proyectos</small>
+        <div class="h6 mb-0">Productos - API</div>
+        <small class="text-muted">Proyecto</small>
       </div>
       <button id="btnCollapse" class="btn btn-sm btn-light ms-auto d-lg-none" aria-label="Cerrar menú">
         <i class="bi bi-x-lg"></i>
@@ -30,7 +34,9 @@
       <a href="#" class="nav-link side-item active" data-section="dashboard"><i class="bi bi-speedometer2 me-3"></i><span>Dashboard</span></a>
       <a href="#" class="nav-link side-item" data-section="productos"><i class="bi bi-box-seam me-3"></i><span>Productos</span></a>
       <a href="#" class="nav-link side-item" data-section="pedidos"><i class="bi bi-card-list me-3"></i><span>Pedidos</span></a>
-      <a href="#" class="nav-link side-item" data-section="config"><i class="bi bi-gear me-3"></i><span>Ajustes</span></a>
+      <a href="" class="nav-link side-item" data-section="config"><i class="bi bi-gear me-3"></i><span>Ajustes</span></a>
+
+      <a href="" id="btnLogout" class="nav-link side-item mt-3 text-danger" data-section="logout"><i class="bi bi-box-arrow-right me-3"></i><span>Cerrar sesión</span></a>
 
       <div class="mt-auto px-2 pb-3">
         <button id="btnToggleTheme" class="btn btn-sm btn-outline-light w-100"><i class="bi bi-moon-fill me-2"></i>Tema</button>
@@ -40,7 +46,7 @@
 
   <!-- MAIN -->
   <main class="flex-grow-1 main">
-    <header class="header mb-3">
+    <header class="header mb-3 d-flex align-items-center justify-content-between">
       <h1 class="m-0">Gestión de Productos</h1>
       <div class="d-flex gap-2 align-items-center">
         <input id="buscarProducto" class="form-control form-control-sm me-2" placeholder="Buscar..." style="min-width:160px;">
@@ -62,7 +68,7 @@
       </table>
     </section>
 
-    <footer class="text-muted small">Hecho por Tavo — Proyecto de práctica</footer>
+    <footer class="text-muted small">Hecho por Gustavo — Proyecto de práctica</footer>
   </main>
 </div>
 
@@ -85,7 +91,7 @@
   </div>
 </div>
 
-<!-- Overlay para telefonos -->
+<!-- Overlay -->
 <div class="overlay-shade d-none" id="overlay"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>

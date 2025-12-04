@@ -1,7 +1,6 @@
-// CRUD + modal + sidebar + search
+// frontend/script.js
+// Lógica principal para index (protección + CRUD)
 const API = 'http://localhost:3000/api/productos';
-
-// DOM
 const productTableBody = document.getElementById('productTable');
 const btnAdd = document.getElementById('btnAdd');
 const modal = document.getElementById('modal');
@@ -12,33 +11,69 @@ const inputPrice = document.getElementById('price');
 const btnClose = document.getElementById('btnClose');
 const sidebar = document.getElementById('sidebar');
 const btnCollapse = document.getElementById('btnCollapse');
-const overlay = document.getElementById('overlay');
 const buscarInput = document.getElementById('buscarProducto');
+
+const logoutLink = document.querySelector('[data-section="logout"]'); // tu link logout
+const overlayEl = document.getElementById('overlay') || document.querySelector('.overlay-shade');
 
 let productosCache = [];
 let editarId = null;
 
-// UTIL: escape
+// --- Protección de página: si no hay token, redirige al login ---
+(function protectPage(){
+  const token = localStorage.getItem('token');
+  if (!token) {
+    // no alert para UX, redirige inmediatamente
+    location.replace('login.html');
+  }
+})();
+
+// Limpia historial (evita volver al login con la flecha)
+history.replaceState(null, '', 'index.html');
+
+// Logout: limpia token y redirige (replace para limpiar historial)
+if (logoutLink) {
+  logoutLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    // redirigir y reemplazar historial
+    location.replace('login.html');
+    // evitar volver atrás
+    setTimeout(() => {
+      history.pushState(null, '', 'login.html');
+      window.onpopstate = () => { location.replace('login.html'); };
+    }, 50);
+  });
+}
+
+// Util: headers auth
+function getAuthHeaders() {
+  const token = localStorage.getItem('token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
+// escape
 function escapeHtml(str){ if (!str) return ''; return String(str).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#39;"); }
 
-// MODAL
+// modal show/hide
 function showModal(mode='create', data={}) {
   editarId = mode === 'edit' ? data.Id : null;
   modalTitle.textContent = mode === 'edit' ? 'Editar producto' : 'Nuevo producto';
   inputName.value = data.Nombre || '';
   inputPrice.value = data.Precio != null ? Number(data.Precio).toFixed(2) : '';
   modal.classList.remove('hidden');
-  overlay.classList.add('show');
-  inputName.focus();
+  overlayEl?.classList.add('show');
+  inputName?.focus();
 }
 function hideModal(){
   modal.classList.add('hidden');
-  overlay.classList.remove('show');
+  overlayEl?.classList.remove('show');
   productForm.reset();
   editarId = null;
 }
 
-// RENDER TABLA
+// render tabla
 function renderizarTabla(productos){
   productos = productos || [];
   productosCache = productos;
@@ -60,58 +95,70 @@ function renderizarTabla(productos){
   }).join('');
 }
 
-// FETCH CRUD
+// CRUD fetch con headers auth
 async function cargarProductos(q=''){
   try {
     const url = q ? `${API}?search=${encodeURIComponent(q)}` : API;
-    const res = await fetch(url);
-    if(!res.ok) throw new Error('Error API');
+    const res = await fetch(url, { headers: { ...getAuthHeaders() } });
+    if (!res.ok) throw new Error('Error API: ' + res.status);
     const datos = await res.json();
     renderizarTabla(datos);
-  } catch(err){
+  } catch (err) {
     console.error(err);
     productTableBody.innerHTML = `<tr><td colspan="4" class="small">No se pudo cargar la lista. Revisa la API.</td></tr>`;
   }
 }
 async function crearProducto(nombre, precio){
-  const res = await fetch(API, { method:'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ nombre, precio })});
-  if(!res.ok) throw new Error('Crear failed');
+  const res = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify({ nombre, precio })
+  });
+  if (!res.ok) throw new Error('Crear failed');
   return res.json();
 }
 async function actualizarProducto(id, nombre, precio){
-  const res = await fetch(`${API}/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ nombre, precio })});
-  if(!res.ok) throw new Error('Actualizar failed');
+  const res = await fetch(`${API}/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify({ nombre, precio })
+  });
+  if (!res.ok) throw new Error('Actualizar failed');
   return res.json();
 }
 async function eliminarProducto(id){
-  const res = await fetch(`${API}/${id}`, { method:'DELETE' });
-  if(!res.ok) throw new Error('Eliminar failed');
+  const res = await fetch(`${API}/${id}`, {
+    method: 'DELETE',
+    headers: { ...getAuthHeaders() }
+  });
+  if (!res.ok) throw new Error('Eliminar failed');
   return res.json();
 }
 
-// EVENTOS
+// Event handlers
 btnAdd?.addEventListener('click', ()=> showModal('create'));
 btnClose?.addEventListener('click', hideModal);
-overlay?.addEventListener('click', hideModal);
+overlayEl?.addEventListener('click', hideModal);
 
-// submit form
+// submit
 productForm?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const nombre = inputName.value.trim();
   const precio = parseFloat(inputPrice.value);
   if (!nombre || isNaN(precio)) { alert('Nombre y precio válidos'); return; }
   try {
-    if (editarId) await actualizarProducto(editarId, nombre, Number(precio.toFixed(2)));
-    else await crearProducto(nombre, Number(precio.toFixed(2)));
+    const valor = Number(precio.toFixed(2));
+    if (editarId) await actualizarProducto(editarId, nombre, valor);
+    else await crearProducto(nombre, valor);
     hideModal();
     await cargarProductos();
-  } catch(err){
+  } catch (err) {
     console.error(err);
-    alert('Error guardando producto');
+    alert('Error guardando producto: ' + (err.message || ''));
   }
 });
 
-// delegación tabla (editar / eliminar)
+// delegación tabla
 productTableBody?.addEventListener('click', async (e) => {
   const editBtn = e.target.closest('.btn-edit');
   const delBtn = e.target.closest('.btn-delete');
@@ -129,13 +176,9 @@ productTableBody?.addEventListener('click', async (e) => {
   }
 });
 
-// sidebar toggle (mobile)
-btnCollapse?.addEventListener('click', ()=> { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
-document.addEventListener('keydown', (e) => { if (e.key === 'm') sidebar.classList.toggle('open'); });
-
 // buscar (debounce)
 function debounce(fn, delay=250){ let t; return (...a)=>{ clearTimeout(t); t = setTimeout(()=>fn(...a), delay);} }
-buscarInput?.addEventListener('input', debounce((ev)=> { const q = ev.target.value.trim(); cargarProductos(q); }, 300));
+document.getElementById('buscarProducto')?.addEventListener('input', debounce((ev)=> { const q = ev.target.value.trim(); cargarProductos(q); }, 300));
 
-// Inicializar
+// init
 cargarProductos();

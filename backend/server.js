@@ -4,23 +4,45 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { poolPromise, sql } = require('./db');
+const { authRouter, authenticateToken } = require('./auth');
 
 const app = express();
+
+// middlewares
 app.use(cors());
 app.use(express.json());
 
-// servir frontend estático (carpeta ../frontend)
+// rutas auth
+app.use('/api/auth', authRouter);
+
+// evitar cache en respuestas HTML sensibles
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
+
+// servir frontend estático (sin index automático)
 const staticPath = path.join(__dirname, '..', 'frontend');
 console.log('Sirviendo frontend desde:', staticPath);
-app.use(express.static(staticPath));
+app.use(express.static(staticPath, { index: false }));
 
-// routes
+// health
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
-app.get('/api/productos', async (req, res) => {
+// PROTEGE endpoints productos con token
+app.get('/api/productos', authenticateToken, async (req, res) => {
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query('SELECT * FROM Productos');
+    const q = req.query.search || '';
+    const request = pool.request();
+    if (q) {
+      request.input('q', sql.NVarChar(100), `%${q}%`);
+      const result = await request.query('SELECT * FROM Productos WHERE Nombre LIKE @q');
+      return res.json(result.recordset);
+    }
+    const result = await request.query('SELECT * FROM Productos');
     res.json(result.recordset);
   } catch (err) {
     console.error(err);
@@ -28,8 +50,7 @@ app.get('/api/productos', async (req, res) => {
   }
 });
 
-// POST para crear producto (opcional)
-app.post('/api/productos', async (req, res) => {
+app.post('/api/productos', authenticateToken, async (req, res) => {
   const { nombre, precio } = req.body;
   if (!nombre || precio == null) return res.status(400).json({ error: 'Faltan datos' });
   try {
@@ -46,9 +67,7 @@ app.post('/api/productos', async (req, res) => {
   }
 });
 
-// otro endpoint para eliminar
-// eliminar producto por id
-app.delete('/api/productos/:id', async (req, res) => {
+app.delete('/api/productos/:id', authenticateToken, async (req, res) => {
   const id = parseInt(req.params.id);
   if (!id) return res.status(400).json({ error: 'Id inválido' });
   try {
@@ -65,8 +84,7 @@ app.delete('/api/productos/:id', async (req, res) => {
   }
 });
 
-// otro endpoint de editar
-app.put('/api/productos/:id', async (req, res) => {
+app.put('/api/productos/:id', authenticateToken, async (req, res) => {
   const id = parseInt(req.params.id);
   const { nombre, precio } = req.body;
   if (!id || !nombre || precio == null) return res.status(400).json({ error: 'Datos inválidos' });
@@ -86,10 +104,16 @@ app.put('/api/productos/:id', async (req, res) => {
   }
 });
 
-
-
-// fallback para la raíz
+// Root -> login
 app.get('/', (req, res) => {
+  res.sendFile(path.join(staticPath, 'login.html'));
+});
+
+// si piden /index.html sin token, queremos que el cliente JS redirija.
+// también puedes forzar server-side, pero con token en localStorage no hay header
+
+app.get('/index.html', (req, res) => {
+  // siempre servir index.html: la protección se hace client-side (scripts)
   res.sendFile(path.join(staticPath, 'index.html'));
 });
 
